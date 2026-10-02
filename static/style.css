@@ -1,0 +1,108 @@
+/* Papel y tinta: fondo crema, bordes finos, todo alineado a la izquierda */
+:root{
+  --fondo:#F3EDE0;
+  --panel:#FBF8F1;
+  --tinta:#22302B;
+  --verde:#2F6B4F;
+  --terracota:#B8553A;
+  --linea:#CFC5AE;
+  --titulos:"Fraunces",Georgia,serif;
+  --texto:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  font-family:var(--texto);
+  background:var(--fondo);
+  color:var(--tinta);
+  margin:0;
+  line-height:1.5;
+}
+main{max-width:620px;margin:40px auto 60px;padding:0 20px}
+
+h1{
+  font-family:var(--titulos);
+  font-weight:700;
+  font-size:1.9rem;
+  line-height:1.15;
+  margin:0 0 22px;
+  padding-bottom:14px;
+  border-bottom:2px solid var(--tinta);
+}
+h3{
+  font-family:var(--titulos);
+  font-weight:500;
+  font-size:1.1rem;
+  display:flex;align-items:center;gap:8px;
+  margin:24px 0 4px;
+}
+
+/* Íconos de línea */
+.ico{
+  width:18px;height:18px;flex:none;
+  fill:none;stroke:currentColor;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* Botones de menú */
+.menu-btn{
+  display:flex;justify-content:space-between;align-items:center;
+  width:100%;text-align:left;
+  font-family:var(--titulos);font-weight:500;font-size:1.1rem;
+  padding:14px 16px;margin-top:10px;
+  background:var(--panel);color:var(--tinta);
+  border:1px solid var(--linea);border-radius:4px;
+  cursor:pointer;
+}
+.menu-btn:hover{border-color:var(--tinta)}
+.menu-btn.on{
+  background:var(--verde);color:#fff;border-color:var(--verde);
+  border-radius:4px 4px 0 0;
+}
+.menu-btn.on .chev{transform:rotate(90deg)}
+
+/* Paneles */
+.panel{
+  display:none;
+  background:var(--panel);
+  border:1px solid var(--linea);border-top:0;border-radius:0 0 4px 4px;
+  padding:20px;
+}
+.panel.open{display:block}
+
+/* Formularios */
+input{
+  font-family:var(--texto);font-size:1rem;
+  padding:9px 10px;
+  border:1px solid var(--tinta);border-radius:4px;
+  background:var(--fondo);color:var(--tinta);
+}
+input:focus{outline:2px solid var(--verde);outline-offset:1px}
+button.go{
+  font-family:var(--texto);font-weight:600;font-size:1rem;
+  padding:9px 16px;margin-left:6px;
+  background:var(--verde);color:#fff;
+  border:1px solid var(--verde);border-radius:4px;
+  cursor:pointer;
+}
+button.go:hover{filter:brightness(.92)}
+
+/* Tablas */
+table{
+  width:100%;border-collapse:collapse;margin-top:12px;
+  font-variant-numeric:tabular-nums;
+}
+th{
+  text-align:left;font-weight:600;font-size:.85rem;
+  padding:8px;border-bottom:2px solid var(--tinta);
+}
+td{padding:8px;border-bottom:1px solid var(--linea);text-align:left}
+
+/* Mensajes y enlaces */
+.msg{
+  margin-top:14px;padding:2px 0 2px 10px;
+  font-weight:600;color:var(--terracota);
+  border-left:3px solid var(--terracota);
+}
+.msg:empty{display:none}
+.enlace{color:var(--verde);font-weight:500;text-decoration:underline}
+.hidden{display:none}

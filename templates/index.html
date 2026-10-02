@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Par o impar, tablas y número secreto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main>
+<h1>Par o impar, tablas y número secreto</h1>
+
+<button class="menu-btn" data-panel="p1"><span>Par o impar</span><svg class="ico chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+<section class="panel" id="p1">
+  <input type="number" id="n1" placeholder="Número">
+  <button class="go" onclick="parImpar()">Verificar</button>
+  <p class="msg" id="m1"></p>
+  <h3>Números ingresados (<span id="c1">0</span>)</h3>
+  <table><thead><tr><th>#</th><th>Número</th><th>Tipo</th><th>Fecha</th></tr></thead><tbody id="t1"></tbody></table>
+</section>
+
+<button class="menu-btn" data-panel="p2"><span>Tabla de multiplicar</span><svg class="ico chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+<section class="panel" id="p2">
+  <input type="number" id="n2" placeholder="Número">
+  <button class="go" onclick="multiplicar()">Ver tabla</button>
+  <p class="msg" id="m2"></p>
+  <table><tbody id="t2"></tbody></table>
+</section>
+
+<button class="menu-btn" data-panel="p3"><span>Adivinar el número</span><svg class="ico chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+<section class="panel" id="p3">
+  <div id="juego">
+    <input type="number" id="n3" placeholder="Tu intento (1 a 100)">
+    <button class="go" onclick="intentar()">Probar</button>
+  </div>
+  <p class="msg" id="m3"></p>
+  <p id="i3"></p>
+  <div id="guardar" class="hidden">
+    <input type="text" id="nombre" placeholder="Tu nombre">
+    <button class="go" onclick="guardar()">Guardar en el ranking</button>
+  </div>
+  <p><a href="#" class="enlace" onclick="nuevo();return false">Nuevo juego</a></p>
+  <h3><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3"/><path d="M12 13v4M9 20h6M10 17h4"/></svg>Top de intentos</h3>
+  <table><thead><tr><th>Puesto</th><th>Nombre</th><th>Intentos</th><th>Números</th></tr></thead><tbody id="t3"></tbody></table>
+</section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// Abrir un menú cierra los demás
+document.querySelectorAll('.menu-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const panel = $(btn.dataset.panel);
+    const estabaAbierto = panel.classList.contains('open');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('on'));
+    if (!estabaAbierto) {
+      panel.classList.add('open');
+      btn.classList.add('on');
+      if (btn.dataset.panel === 'p1') cargarParImpar();
+      if (btn.dataset.panel === 'p3') cargarSecreto();
+    }
+  });
+});
+
+async function api(url, datos) {
+  const r = await fetch(url, datos === undefined ? {} : {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+// ---- Menú 1 ----
+function pintarFilas(filas) {
+  $('c1').textContent = filas.length;
+  $('t1').innerHTML = filas.map((f, i) =>
+    `<tr><td>${filas.length - i}</td><td>${f.numero}</td><td>${f.tipo}</td><td>${f.fecha}</td></tr>`).join('');
+}
+async function cargarParImpar() { pintarFilas((await api('/api/par_impar')).filas); }
+async function parImpar() {
+  const d = await api('/api/par_impar', {numero: $('n1').value});
+  $('m1').textContent = d.error || d.mensaje;
+  if (d.filas) pintarFilas(d.filas);
+  $('n1').value = '';
+}
+
+// ---- Menú 2 ----
+async function multiplicar() {
+  const d = await api('/api/multiplicador', {numero: $('n2').value});
+  $('m2').textContent = d.error || '';
+  $('t2').innerHTML = d.tabla ? d.tabla.map(l => `<tr><td>${l}</td></tr>`).join('') : '';
+}
+
+// ---- Menú 3 ----
+function pintarTop(top) {
+  $('t3').innerHTML = top.map((t, i) =>
+    `<tr><td>${i + 1}</td><td>${t.nombre}</td><td>${t.total_intentos}</td><td>${t.numeros_intentados}</td></tr>`).join('');
+}
+function pintarIntentos(arr) { $('i3').textContent = arr.length ? 'Intentos: ' + arr.join(', ') : ''; }
+async function cargarSecreto() {
+  const d = await api('/api/secreto/estado');
+  pintarTop(d.top); pintarIntentos(d.intentos);
+}
+async function intentar() {
+  const d = await api('/api/secreto/intentar', {numero: $('n3').value});
+  $('n3').value = '';
+  if (d.error) { $('m3').textContent = d.error; return; }
+  $('m3').textContent = d.mensaje;
+  pintarIntentos(d.intentos);
+  if (d.gano) { $('juego').classList.add('hidden'); $('guardar').classList.remove('hidden'); }
+}
+function reiniciarVista() {
+  $('juego').classList.remove('hidden'); $('guardar').classList.add('hidden');
+  $('m3').textContent = ''; $('i3').textContent = ''; $('nombre').value = '';
+}
+async function guardar() {
+  const d = await api('/api/secreto/guardar', {nombre: $('nombre').value});
+  reiniciarVista(); pintarTop(d.top);
+}
+async function nuevo() {
+  const d = await api('/api/secreto/nuevo', {});
+  reiniciarVista(); pintarTop(d.top);
+}
+</script>
+</body>
+</html>
